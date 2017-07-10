@@ -1,0 +1,114 @@
+<html>
+
+<head>
+    <title>welcome to {{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="http://localhost:4000/css/style.css">
+</head>
+
+<body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <div id="myDIV" class="header">
+        <h1>Hi, secure user.</h1>
+    </div>
+    <ul>
+        <li><a href="/welcome">Welcome page</a></li>
+        <li><a href="/logout"> Logout</a></li>
+    </ul>
+    <form action="" method="post">
+        <h2> <label>Enter a new task:</label>
+    <input type="text" class="input" name="newtodo" id="newtodo" autofocus />
+    <input type="submit"  id="add" value="Add"> </h2>
+    </form>
+    <!-- <div id="completed">
+  <input type="button" value="Clear Completed" id="clear" />
+</div> -->
+    <ul id="todo-items">
+        {% for item in todolist %}
+        <li><span>{{item}}</span>
+            <button class='delete'>Delete</button>
+            <button class='edit'>Edit</button>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <script type="text/javascript">
+    $(document).on('click', '.edit', function() {
+        //var index = $(this).data('id');
+      //  var value2 = $(this).closest("li").find('span').text();
+        var value = $(this).closest("li").find('span').text();
+        console.log(value);
+        $(this).hide();
+        //$(this).parent().append('<span id="save_Task" class=".old_value" value="' + value2 + '"></</span>');
+        $(this).parent().append('<button id="save_Task">SaveTask</button>');
+        
+        //$(this).parent().prev().children().hide();
+        $(this).parent().append('<input type="text" class="updated_value" value="' + value + '">');
+        $('#todo-items').focus();
+    });
+
+    $(document).on('click', '#save_Task', function() {
+        var value1 = $(this).parent().find(".updated_value").val();
+        var value3 = $(this).closest("li").find('span').text();        
+       // var index = $(this).prev().data('id');
+        updateTask(value1,value3);
+        $(this).parent().find(".updated_value").remove();
+        $(this).parent().find('span').text(value1);
+        $(this).parent().find("span").show();
+        $(this).prev().show();
+        $(this).remove();
+    });
+
+    function updateTask(value,oldvalue) {
+       var id = value;
+       var old_val = oldvalue;
+       $.ajax({
+                    url: '/todo/' + id,
+                    method: 'PUT',
+                    data : {newval : id,
+                        oldval : old_val }
+                })
+                .done(function(result) {
+                    if (result == 'updated') {
+                        console.log("updated");
+                    }
+                })
+                .fail(function(err) {
+                    console.log("error",err);
+                })
+                .always(function() {
+                    console.log("complete");
+                });
+       console.log(id);
+    }
+
+    $(document).on("click", '.delete', function() {
+        var text = $(this).closest("li").find('span').text();
+        $(this).closest("li").fadeOut(function() {
+            $.ajax({
+                    url: '/todo/' + text,
+                    type: 'DELETE'
+
+                })
+                .done(function(result) {
+                    if (result == 'deleted') {
+                        $(this).remove();
+                        console.log("del");
+                    }
+                })
+                .fail(function() {
+                    console.log("error");
+                })
+                .always(function() {
+                    console.log("complete");
+                });
+
+
+
+        });
+        return false;
+    })
+    </script>
+</body>
+
+</html>
